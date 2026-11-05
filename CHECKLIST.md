@@ -33,4 +33,6 @@ Date: 2 November 2026
 
 ## 4. SonarQube for IDE warnings I saw in app.js
 
-- Web application technologies should not disclose version information
+- Improper input validation exposed sensitive data/information from the database to an unauthorized user/client/agent
+
+- Solution: Proper input validation (by design) to unauthorized data exposure
