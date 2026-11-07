@@ -1,18 +1,15 @@
 const express = require('express');
+const helmet = require('helmet');
 const sqlite3 = require('sqlite3');
 const _ = require('lodash');
 
 const app = express();
-
-app.use((req, res, next) => {
-  res.setHeader('Content-Security-Policy', "default-src 'self'");
-  next();
-});
+app.use(helmet());
 
 const db = new sqlite3.Database(':memory:');
 
-const API_KEY = 'a8f5f167f44f4964e6c998dee827110c';
-const DB_PASSWORD = 'Admin@12345';
+const API_KEY = process.env.API_KEY;
+const DB_PASSWORD = process.env.DB_PASSWORD;
 
 db.serialize(() => {
   db.run('CREATE TABLE users (id INTEGER, name TEXT, email TEXT)');
@@ -48,6 +45,11 @@ app.get('/search', (req, res) => {
 
 app.get('/settings', (req, res) => {
   res.json(_.merge({ theme: 'light' }, JSON.parse(req.query.data || '{}')));
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Something went wrong' });
 });
 
 app.listen(3000, '127.0.0.1', () => console.log('http://localhost:3000'));
