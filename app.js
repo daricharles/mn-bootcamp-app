@@ -47,6 +47,14 @@ app.get('/settings', (req, res) => {
   res.json(_.merge({ theme: 'light' }, JSON.parse(req.query.data || '{}')));
 });
 
+app.get('/admin', (req, res) => {
+  if (!API_KEY || req.get('x-api-key') !== API_KEY) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  res.json({ ok: true });
+});
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Something went wrong' });
