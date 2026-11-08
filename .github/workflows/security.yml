@@ -1,0 +1,48 @@
+name: security-checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - uses: snyk/actions/setup@master
+        id: snyk_setup
+      - name: Snyk Open Source
+        run: snyk test --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Snyk Code
+        if: ${{ !cancelled() && steps.snyk_setup.outcome == 'success' }}
+        run: snyk code test --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: bootcamp-app
+          path: .
+          format: HTML
+          out: reports
+          args: >-
+            --failOnCVSS 7
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+      - name: Upload Dependency-Check report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: reports
