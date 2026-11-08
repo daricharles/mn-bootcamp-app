@@ -40,7 +40,7 @@ const escapeHtml = (value) => String(value)
 
 app.get('/search', (req, res) => {
   const query = req.query.q ?? '';
-  res.send('<h1>Results for ' + escapeHtml(query) + '</h1>');
+  res.send('<h1>Results for ' + _.escape(String(query)) + '</h1>');
 });
 
 app.get('/settings', (req, res) => {
